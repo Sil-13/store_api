@@ -1,19 +1,21 @@
-from fastapi import FastAPI
-
-from store.core.config import settings
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
+from store.core.exceptions import InsertionException, NotFoundException
 from store.routers import api_router
 
-
-class App(FastAPI):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(
-            *args,
-            **kwargs,
-            version="0.0.1",
-            title=settings.PROJECT_NAME,
-            root_path=settings.ROOT_PATH
-        )
-
-
-app = App()
+app = FastAPI(title="Store API")
 app.include_router(api_router)
+
+@app.exception_handler(InsertionException)
+def insertion_exception_handler(request: Request, exc: InsertionException):
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"message": str(exc)},
+    )
+
+@app.exception_handler(NotFoundException)
+def not_found_exception_handler(request: Request, exc: NotFoundException):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"message": str(exc)},
+    )
