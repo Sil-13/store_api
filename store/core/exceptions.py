@@ -5,6 +5,8 @@ class BaseException(Exception):
         if message:
             self.message = message
 
-
 class NotFoundException(BaseException):
-    message = "Not Found"
+    message: str = "Not Found"
+
+class InsertionException(BaseException):
+    message: str = "Could not insert data"
